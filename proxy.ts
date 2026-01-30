@@ -13,5 +13,6 @@ export const config = {
     matcher: [
         '/dashboard',
         '/dashboard/:path*',
+        '/create-post'
     ],
 };

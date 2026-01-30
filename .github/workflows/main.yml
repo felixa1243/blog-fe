@@ -22,9 +22,9 @@ jobs:
 
       - name: 🔨 Build Next.js app
         run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
           npm install
           npm run build
-          # We pack .next, public, and package files
           tar -czf build.tar.gz .next public package.json package-lock.json next.config.ts
 
       - name: 📦 Upload build to server

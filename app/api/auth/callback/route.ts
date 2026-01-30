@@ -45,6 +45,6 @@ export async function GET(request: NextRequest) {
 
     });
 
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL(process.env.NEXT_PUBLIC_FRONTEND_URL + '/dashboard', request.url));
 
 }

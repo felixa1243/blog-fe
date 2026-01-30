@@ -22,7 +22,7 @@ jobs:
 
       - name: 🔨 Build Next.js app
         run: |
-          npm ci
+          npm install
           npm run build
           tar -czf build.tar.gz .next public package.json package-lock.json
 

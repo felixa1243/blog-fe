@@ -7,7 +7,7 @@ export default function SignOutButton() {
 
     async function signOut() {
         try {
-            const response = await fetch("/api/auth/logout", {
+            const response = await fetch(process.env.NEXT_PUBLIC_BLOG_API_URL + "/api/auth/logout", {
                 method: "POST",
             });
 

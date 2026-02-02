@@ -29,8 +29,8 @@ const getAuthenticatedUser = cache(async () => {
 
 export default async function Navbar() {
     const userData = await getAuthenticatedUser();
+    console.log(userData)
     const isAuthenticated = !!userData;
-
     return (
         <nav className="bg-gray-950 fixed w-full z-20 top-0 start-0 border-b border-default">
             <div className="max-w-7xl flex flex-wrap items-center justify-between mx-auto p-4">
@@ -39,7 +39,7 @@ export default async function Navbar() {
                 </Link>
                 <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
                     {isAuthenticated ? (
-                        <Userdropdown name={userData.name} email={userData.email} role={userData.role} />
+                        <Userdropdown name={userData.fullname} email={userData.email} role={userData.role} />
                     ) : (
                         <LoginButton />
                     )}

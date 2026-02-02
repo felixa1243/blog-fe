@@ -1,4 +1,4 @@
-"use client"; // Required for interactivity
+"use client";
 
 import { useRouter } from "next/navigation";
 
@@ -7,15 +7,16 @@ export default function SignOutButton() {
 
     async function signOut() {
         try {
-            const response = await fetch(process.env.NEXT_PUBLIC_FRONTEND_URL + "/api/auth/logout", {
+            // Point to your local Next.js API route
+            const response = await fetch("/api/auth/logout", {
                 method: "POST",
             });
 
             if (response.ok) {
                 router.refresh();
-                router.push("/login");
+                router.replace("/");
             } else {
-                console.error("Logout failed");
+                console.error("Logout failed at backend");
             }
         } catch (error) {
             console.error("An error occurred during logout:", error);

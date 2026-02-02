@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 export function proxy(request: NextRequest) {
     const token = request.cookies.get('access_token')?.value;
-    const ssoLoginUrl = `${process.env.NEXT_PUBLIC_AUTH_URL}/login?redirect_url=${encodeURIComponent(request.url)}`;
+    const ssoLoginUrl = `${process.env.NEXT_PUBLIC_AUTH_URL}/login?redirect_url=${encodeURIComponent(process.env.NEXT_PUBLIC_CALLBACK_SSO_URL)}`;
     if (!token) {
         return NextResponse.redirect(ssoLoginUrl);
     }

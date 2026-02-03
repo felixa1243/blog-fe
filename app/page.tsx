@@ -51,11 +51,11 @@ export default function BlogPage() {
         ) : posts.length > 0 ? (
           posts.map((post: Post) => (
             <Card key={post.id} className="relative mx-auto w-full pt-0 overflow-hidden">
-              <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
+
               <img
                 src={`${process.env.NEXT_PUBLIC_BLOG_API_URL}/${post.thumbnail_path}`}
                 alt={post.title}
-                className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale"
+                className="relative z-20 aspect-video w-full object-cover"
               />
               <CardHeader>
                 <CardAction>

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import SignOutButton from "./SignOutButton";
+import { Badge } from "@/components/ui/badge";
 
 type userDataType = {
     name: string,
@@ -28,9 +29,9 @@ export default function Userdropdown(userData: userDataType) {
             {dropDownActivated && (
                 /* Changed: top-full mt-2 right-0 | Removed: bottom-7 hidden */
                 <div className="z-50  bg-black absolute top-full mt-2 right-0 bg-gray-950-medium border border-default-medium rounded-xl shadow-lg w-44 text-white" id="user-dropdown">
-                    <div className="px-4 py-3 text-sm border-b border-default text-white">
+                    <div className="px-4 py-3 text-sm border-b border-default text-white flex gap-3 items-center">
                         <span className="block text-heading font-medium">{userData.name}</span>
-                        <span className="block text-body truncate">{userData.role}</span>
+                        <Badge variant="secondary" >{userData.role}</Badge>
                     </div>
                     <ul className="p-2 text-sm text-body font-medium" aria-labelledby="user-menu-button">
                         <li>

@@ -77,6 +77,7 @@ import content from "@/components/tiptap-templates/simple/data/content.json"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import SelectCategory from "@/app/components/SelectCategory"
+import { toast } from "sonner"
 
 
 const MainToolbarContent = ({
@@ -290,6 +291,7 @@ export function SimpleEditor() {
     }
     finally {
       setIsSubmitting(false);
+      toast.success('Post saved successfully')
     }
   };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

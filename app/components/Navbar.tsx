@@ -35,7 +35,7 @@ export default async function Navbar() {
         <nav className="bg-gray-950 fixed w-full z-20 top-0 start-0 border-b border-default">
             <div className="max-w-7xl flex flex-wrap items-center justify-between mx-auto p-4">
                 <Link href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
-                    <span className="self-center text-xl text-heading font-semibold whitespace-nowrap">Iqbal Network </span>
+                    <span className="self-center text-xl text-white font-semibold whitespace-nowrap">Iqbal Network </span>
                 </Link>
                 <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
                     {isAuthenticated ? (

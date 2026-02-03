@@ -76,6 +76,8 @@ import "@/components/tiptap-templates/simple/simple-editor.scss"
 import content from "@/components/tiptap-templates/simple/data/content.json"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import SelectCategory from "@/app/components/SelectCategory"
+
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -84,8 +86,7 @@ const MainToolbarContent = ({
 }: {
   onHighlighterClick: () => void
   onLinkClick: () => void
-  isMobile: boolean,
-  onSave: () => void
+  isMobile: boolean
 }) => {
   return (
     <>
@@ -186,6 +187,14 @@ const MobileToolbarContent = ({
   </>
 )
 
+const generateSlug = (text: string) => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
 export function SimpleEditor() {
   const isMobile = useIsBreakpoint()
   const { height } = useWindowSize()
@@ -197,6 +206,11 @@ export function SimpleEditor() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slug, setSlug] = useState("")
   const [previewUrl, setPreviewUrl] = useState<string | null>(null); const [title, setTitle] = useState('');
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    setSlug(generateSlug(newTitle));
+  };
   const editor = useEditor({
     immediatelyRender: false,
     editorProps: {
@@ -241,7 +255,7 @@ export function SimpleEditor() {
     editor,
     overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
   })
-  const handleSave = async (editor: Editor, title: string, thumbnail: File) => {
+  const handleSave = async (editor: Editor, title: string, thumbnail: File, categories: number[]) => {
     if (!editor || !title || !thumbnail) {
       alert("Please provide a title, thumbnail, and content");
       return;
@@ -251,6 +265,8 @@ export function SimpleEditor() {
     formData.append("title", title);
     formData.append("content", editor.getHTML());
     formData.append("thumbnail", thumbnail);
+    formData.append("categories", JSON.stringify(categories.map(el => Number(el))));
+    formData.append("slug", slug)
     setIsSubmitting(true);
 
     try {
@@ -282,6 +298,7 @@ export function SimpleEditor() {
 
     if (file) {
       const url = URL.createObjectURL(file);
+      console.log(url)
       setPreviewUrl(url);
     } else {
       setPreviewUrl(null);
@@ -292,13 +309,13 @@ export function SimpleEditor() {
       setMobileView("main")
     }
   }, [isMobile, mobileView])
-
+  const [category, setCategory] = useState([])
   return (
     <div className="w-full flex gap-7">
       <div className="simple-editor-wrapper p-7">
         <Field>
           <FieldLabel>Title</FieldLabel>
-          <Input id="title" onChange={(e) => setTitle(e.target.value)}></Input>
+          <Input id="title" onChange={handleTitleChange}></Input>
         </Field>
         <EditorContext.Provider value={{ editor }}>
           <Toolbar
@@ -366,9 +383,16 @@ export function SimpleEditor() {
             </p>
           )}
         </div>
-
+        <div className="w-full">
+          <SelectCategory onCategoryChange={(value) => setCategory(prev => [...prev, value])} />
+          <div className="flex gap-7">
+            <span className="text-gray-300">
+              Selected categories: {category.join(", ")}
+            </span>
+          </div>
+        </div>
         <Button
-          onClick={() => handleSave(editor, title, thumbnail)}
+          onClick={() => handleSave(editor, title, thumbnail, category)}
           disabled={isSubmitting}
           style={{ backgroundColor: '#007bff', color: 'white' }}
         >

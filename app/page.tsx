@@ -42,7 +42,7 @@ export default async function LoginPage() {
                 </CardDescription>
               </CardHeader>
               <CardFooter>
-                <Link href={`/post/${post.slug}`}>Read more</Link>
+                <Link href={`/posts/${post.slug}`}>Read more</Link>
               </CardFooter>
             </Card>
           ))

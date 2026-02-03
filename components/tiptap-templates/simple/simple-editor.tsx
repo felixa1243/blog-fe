@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
+import { Editor, EditorContent, EditorContext, useEditor } from "@tiptap/react"
 
 // --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit"
@@ -74,6 +74,8 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 
 import content from "@/components/tiptap-templates/simple/data/content.json"
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -82,7 +84,8 @@ const MainToolbarContent = ({
 }: {
   onHighlighterClick: () => void
   onLinkClick: () => void
-  isMobile: boolean
+  isMobile: boolean,
+  onSave: () => void
 }) => {
   return (
     <>
@@ -190,6 +193,10 @@ export function SimpleEditor() {
     "main"
   )
   const toolbarRef = useRef<HTMLDivElement>(null)
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [slug, setSlug] = useState("")
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null); const [title, setTitle] = useState('');
   const editor = useEditor({
     immediatelyRender: false,
     editorProps: {
@@ -234,7 +241,52 @@ export function SimpleEditor() {
     editor,
     overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
   })
+  const handleSave = async (editor: Editor, title: string, thumbnail: File) => {
+    if (!editor || !title || !thumbnail) {
+      alert("Please provide a title, thumbnail, and content");
+      return;
+    }
 
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("content", editor.getHTML());
+    formData.append("thumbnail", thumbnail);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BLOG_API_URL}/posts`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Post created:", data);
+      }
+      else {
+        const errorData = await response.json();
+        console.error("Save failed:", errorData.error);
+      }
+
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+    finally {
+      setIsSubmitting(false);
+    }
+  };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setThumbnail(file);
+
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  };
   useEffect(() => {
     if (!isMobile && mobileView !== "main") {
       setMobileView("main")
@@ -242,38 +294,87 @@ export function SimpleEditor() {
   }, [isMobile, mobileView])
 
   return (
-    <div className="simple-editor-wrapper">
-      <EditorContext.Provider value={{ editor }}>
-        <Toolbar
-          ref={toolbarRef}
-          style={{
-            ...(isMobile
-              ? {
-                bottom: `calc(100% - ${height - rect.y}px)`,
-              }
-              : {}),
-          }}
-        >
-          {mobileView === "main" ? (
-            <MainToolbarContent
-              onHighlighterClick={() => setMobileView("highlighter")}
-              onLinkClick={() => setMobileView("link")}
-              isMobile={isMobile}
-            />
-          ) : (
-            <MobileToolbarContent
-              type={mobileView === "highlighter" ? "highlighter" : "link"}
-              onBack={() => setMobileView("main")}
-            />
-          )}
-        </Toolbar>
+    <div className="w-full flex gap-7">
+      <div className="simple-editor-wrapper p-7">
+        <Field>
+          <FieldLabel>Title</FieldLabel>
+          <Input id="title" onChange={(e) => setTitle(e.target.value)}></Input>
+        </Field>
+        <EditorContext.Provider value={{ editor }}>
+          <Toolbar
+            ref={toolbarRef}
+            style={{
+              ...(isMobile
+                ? {
+                  bottom: `calc(100% - ${height - rect.y}px)`,
+                }
+                : {}),
+            }}
+          >
+            {mobileView === "main" ? (
+              <MainToolbarContent
+                onHighlighterClick={() => setMobileView("highlighter")}
+                onLinkClick={() => setMobileView("link")}
+                isMobile={isMobile}
+              />
+            ) : (
+              <MobileToolbarContent
+                type={mobileView === "highlighter" ? "highlighter" : "link"}
+                onBack={() => setMobileView("main")}
+              />
+            )}
+          </Toolbar>
 
-        <EditorContent
-          editor={editor}
-          role="presentation"
-          className="simple-editor-content"
-        />
-      </EditorContext.Provider>
+          <EditorContent
+            editor={editor}
+            role="presentation"
+            className="simple-editor-content"
+          />
+        </EditorContext.Provider>
+      </div>
+      <aside className="py-7 flex flex-col gap-4 w-62.5" >
+        <div className="flex flex-col gap-3">
+          <Field>
+            <FieldLabel>Post Slug</FieldLabel>
+            <Input id="slug" type="text" onChange={(e) => setSlug(e.target.value)} value={slug} />
+          </Field>
+        </div>
+        <div className="thumbnail-upload">
+          <Field>
+            <FieldLabel>Thumbnail</FieldLabel>
+            <Input id="picture" type="file" onChange={handleFileChange} />
+            <FieldDescription>Select a picture to</FieldDescription>
+          </Field>
+          <div className="relative aspect-video mb-2 overflow-hidden rounded-md border-2 border-dashed border-muted-foreground/25 bg-muted/50 flex items-center justify-center">
+            {previewUrl ? (
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <div className="text-center p-4">
+                <p className="text-xs text-muted-foreground text-balance">
+                  No image selected. This will be the cover photo.
+                </p>
+              </div>
+            )}
+          </div>
+          {thumbnail && (
+            <p style={{ fontSize: '12px', marginTop: '5px' }}>
+              Selected: {thumbnail.name}
+            </p>
+          )}
+        </div>
+
+        <Button
+          onClick={() => handleSave(editor, title, thumbnail)}
+          disabled={isSubmitting}
+          style={{ backgroundColor: '#007bff', color: 'white' }}
+        >
+          {isSubmitting ? "Publishing..." : "Publish Post"}
+        </Button>
+      </aside>
     </div>
   )
 }
